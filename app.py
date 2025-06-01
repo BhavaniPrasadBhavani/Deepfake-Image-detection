@@ -13,9 +13,28 @@ def load_model():
     
     # Load the trained weights
     try:
-        model.load_state_dict(torch.load('deepfake_detector.pth', map_location='cpu'))
-        model.eval()
-        print("Model loaded successfully!")
+        # Try different possible model file names
+        model_files = ['deepfake_detector.pth', 'model.pth', 'best_model.pth']
+        model_loaded = False
+        
+        for model_file in model_files:
+            try:
+                state_dict = torch.load(model_file, map_location='cpu')
+                model.load_state_dict(state_dict)
+                model.eval()
+                print(f"Model loaded successfully from {model_file}!")
+                model_loaded = True
+                break
+            except FileNotFoundError:
+                continue
+            except Exception as e:
+                print(f"Error loading {model_file}: {e}")
+                continue
+        
+        if not model_loaded:
+            print("No model file found. Please upload deepfake_detector.pth")
+            return None
+            
         return model
     except Exception as e:
         print(f"Error loading model: {e}")
